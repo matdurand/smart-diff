@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/matdurand/smart-diff/compare/v1.2.0...v1.3.0) (2020-03-29)
+
+
+### Features
+
+* added support for dates transformations ([1f235cc](https://github.com/matdurand/smart-diff/commit/1f235ccc15898164a1b0bbc728f363b6edb595ae))
+* setup github actions ([9eec664](https://github.com/matdurand/smart-diff/commit/9eec6646b99a61a1ebdd4e5ef1775c3fdad4268a))
+
 ## 1.2.0 (2020-03-28)
 
 
