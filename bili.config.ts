@@ -8,7 +8,7 @@ const config: Config = {
   output: {
     fileName: "index.js",
     format: ["cjs"],
-    moduleName: "smart-diff"
+    moduleName: "smart-differences"
   },
   plugins: {
     typescript2: {

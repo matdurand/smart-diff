@@ -1,4 +1,4 @@
-# smart-diff
+# smart-differences
 
 This library provides multiple ways to compare javascript objects.
 
@@ -7,11 +7,11 @@ This library provides multiple ways to compare javascript objects.
 For NPM:
 
 ```
-npm install --save smart-diff
+npm install --save smart-differences
 ```
 
 For yarn
 
 ```
-yarn add smart-diff
+yarn add smart-differences
 ```
