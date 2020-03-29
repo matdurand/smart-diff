@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/matdurand/smart-diff/compare/v1.3.0...v1.3.1) (2020-03-29)
+
+
+### Bug Fixes
+
+* github action npm publish ([c028803](https://github.com/matdurand/smart-diff/commit/c028803431183db85a6af803e93b31962983de71))
+
 ## [1.3.0](https://github.com/matdurand/smart-diff/compare/v1.2.0...v1.3.0) (2020-03-29)
 
 
