@@ -1,6 +1,6 @@
 import { getDifferences, Differences, PathFilter, StringTransformations } from "./index";
 import { get } from "lodash";
-import moment, { Moment } from "moment";
+import moment from "moment";
 
 const expectDiffCount = (diff: Differences, expectedCount: number) => {
     expect(Object.keys(diff).length, `There should be exactly ${expectedCount} differences`).toBe(expectedCount);
@@ -232,9 +232,10 @@ describe("smart-differences", () => {
                         firstName: "john",
                         lastName: "mcclane ",
                         killCount: "251",
+                        nip: undefined,
                         address: {
                             civicNumber: 1014,
-                            street: "Pacific Coast Highway",
+                            street: null,
                             city: "Los Angeles",
                             postalCode: "W2k 7r9"
                         },
@@ -250,6 +251,7 @@ describe("smart-differences", () => {
                         firstName: "John",
                         lastName: "McClane",
                         killCount: 251,
+                        nip: null,
                         phones: {
                             primary: "1-877-ask-help"
                         },
@@ -274,6 +276,8 @@ describe("smart-differences", () => {
                                 case "killCount":
                                 case "address.civicNumber":
                                     return [StringTransformations.toString];
+                                case "address.street":
+                                    return [StringTransformations.toString];
                                 case "address.postalCode":
                                     return [StringTransformations.uppercase, removeSequenceTransformation(" ")];
                                 case "phones.primary":
@@ -288,7 +292,9 @@ describe("smart-differences", () => {
                             return null;
                         }
                     });
-                    expectDiffCount(diffs, 1);
+                    expectDiffCount(diffs, 3);
+                    expectDiffOnProperty(diffs, "nip", undefined, null);
+                    expectDiffOnProperty(diffs, "address.street", null, "Pacific Coast Highway");
                     expectDiffOnProperty(diffs, "emails.primary", undefined, "smart.ass@diehard.com");
                 });
             });
