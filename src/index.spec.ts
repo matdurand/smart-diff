@@ -1,5 +1,6 @@
 import { getDifferences, Differences, PathFilter, StringTransformations } from "./index";
 import { get } from "lodash";
+import moment, { Moment } from "moment";
 
 const expectDiffCount = (diff: Differences, expectedCount: number) => {
     expect(Object.keys(diff).length, `There should be exactly ${expectedCount} differences`).toBe(expectedCount);
@@ -74,6 +75,36 @@ describe("smart-differences", () => {
             expectDiffOnProperty(diffs, "age", 19, "19");
         });
 
+        it("should return no difference for a date property when the date is the same", () => {
+            const diffs = getDifferences(
+                {
+                    d1: new Date("2000-02-01T00:00:00.000Z")
+                },
+                {
+                    d1: new Date("2000-02-01T00:00:00.000Z")
+                }
+            );
+            expectDiffCount(diffs, 0);
+        });
+
+        it("should return a difference for a date property when the date is not the same", () => {
+            const diffs = getDifferences(
+                {
+                    d1: new Date("2000-02-01T00:00:00.000Z")
+                },
+                {
+                    d1: new Date("2000-02-02T00:00:00.000Z")
+                }
+            );
+            expectDiffCount(diffs, 1);
+            expectDiffOnProperty(
+                diffs,
+                "d1",
+                new Date("2000-02-01T00:00:00.000Z"),
+                new Date("2000-02-02T00:00:00.000Z")
+            );
+        });
+
         describe("with options", () => {
             describe("using path filtering", () => {
                 describe("using whitelisting", () => {
@@ -146,6 +177,28 @@ describe("smart-differences", () => {
                         { ...johnProfile, name: null },
                         {
                             compareTransformations: [StringTransformations.nullOfUndefinedAsEmptyString]
+                        }
+                    );
+                    expectDiffCount(diffs, 0);
+                });
+            });
+
+            describe("using a date transformation option", () => {
+                it("should compare dates as time value", () => {
+                    const compareDatesAtStartOfDay = (value: unknown) => {
+                        if (value && (value as any)["setHours"]) {
+                            return moment(value as Date)
+                                .utc()
+                                .startOf("day")
+                                .toDate();
+                        }
+                        return value;
+                    };
+                    const diffs = getDifferences(
+                        { d1: new Date("2000-02-01T00:00:00.000Z") },
+                        { d1: new Date("2000-02-01T05:00:00.000Z") },
+                        {
+                            compareTransformations: [compareDatesAtStartOfDay]
                         }
                     );
                     expectDiffCount(diffs, 0);

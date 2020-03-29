@@ -41,6 +41,10 @@ export type CompareOptions = {
     pathCompareTransformationsProvider?: PathCompareTransformationsProvider;
 };
 
+function isDate(obj: unknown): boolean {
+    return Object.prototype.toString.call(obj) === "[object Date]";
+}
+
 function applyTransformations(transformations: TransformValueFunction[], value: unknown) {
     let finalValue = value;
     transformations.forEach(t => {
@@ -53,6 +57,9 @@ function createCompareFunction(compareTransformations?: TransformValueFunction[]
     return (left: unknown, right: unknown) => {
         const finalLeft = applyTransformations(compareTransformations || [], left);
         const finalRight = applyTransformations(compareTransformations || [], right);
+        if (isDate(finalLeft) && isDate(finalRight)) {
+            return (finalLeft as Date).getTime() - (finalRight as Date).getTime() === 0;
+        }
         return finalLeft === finalRight;
     };
 }
