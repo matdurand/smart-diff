@@ -41,6 +41,10 @@ export type CompareOptions = {
     pathCompareTransformationsProvider?: PathCompareTransformationsProvider;
 };
 
+function flatMap<T, U>(array: T[], callbackfn: (value: T, index: number, array: T[]) => U[]): U[] {
+    return Array.prototype.concat(...array.map(callbackfn));
+}
+
 function isDate(obj: unknown): boolean {
     return Object.prototype.toString.call(obj) === "[object Date]";
 }
@@ -122,7 +126,7 @@ function getExplodedDifferences(differences: Diff<unknown, unknown>[]): Diff<unk
     const diffNewObjectFilter = (diff: any) => diff.kind === "N" && isPlainObject(diff.rhs);
     const diffDeletedObjectFilter = (diff: any) => diff.kind === "D" && isPlainObject(diff.lhs);
 
-    const diffNewAdditions = differences.filter(diffNewObjectFilter).flatMap((diff: any) => {
+    const diffNewAdditions = flatMap(differences.filter(diffNewObjectFilter), (diff: any) => {
         const pathString = diff.path.join(".");
         return Object.entries(flattenObject(diff.rhs, `${pathString}.`)).map(([key, value]) => {
             return {
@@ -133,7 +137,7 @@ function getExplodedDifferences(differences: Diff<unknown, unknown>[]): Diff<unk
         });
     });
 
-    const diffDeletedAdditions = differences.filter(diffDeletedObjectFilter).flatMap((diff: any) => {
+    const diffDeletedAdditions = flatMap(differences.filter(diffDeletedObjectFilter), (diff: any) => {
         const pathString = diff.path.join(".");
         return Object.entries(flattenObject(diff.lhs, `${pathString}.`)).map(([key, value]) => {
             return {
