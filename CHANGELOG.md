@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/matdurand/smart-diff/compare/v1.3.1...v1.4.0) (2020-03-31)
+
+
+### Features
+
+* output nested objects vs null as list of differences ([591d16d](https://github.com/matdurand/smart-diff/commit/591d16d25fdb0db260ae77f4188c1b8cf92b834a))
+
 ### [1.3.1](https://github.com/matdurand/smart-diff/compare/v1.3.0...v1.3.1) (2020-03-29)
 
 
