@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/matdurand/smart-diff/compare/v1.5.0...v1.5.1) (2020-03-31)
+
+
+### Bug Fixes
+
+* apply transformations for new and deleted properties ([af35dc1](https://github.com/matdurand/smart-diff/commit/af35dc1b66171c815cd4842391ca34d46138803d))
+
 ## [1.5.0](https://github.com/matdurand/smart-diff/compare/v1.4.2...v1.5.0) (2020-03-31)
 
 
