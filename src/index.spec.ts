@@ -47,7 +47,7 @@ describe("smart-differences", () => {
             expectDiffOnProperty(diffs, "age", 19, undefined);
             expectDiffOnProperty(diffs, "name", "john", undefined);
             expectDiffOnProperty(diffs, "nip", null, undefined);
-            expectDiffOnProperty(diffs, "emails.primary", "john@example.com", undefined);
+            expectDiffOnProperty(diffs, "emails", { primary: "john@example.com" }, undefined);
         });
 
         it("should return all field from right when left is null", () => {
@@ -56,7 +56,7 @@ describe("smart-differences", () => {
             expectDiffOnProperty(diffs, "age", undefined, 19);
             expectDiffOnProperty(diffs, "name", undefined, "john");
             expectDiffOnProperty(diffs, "nip", undefined, null);
-            expectDiffOnProperty(diffs, "emails.primary", undefined, "john@example.com");
+            expectDiffOnProperty(diffs, "emails", undefined, { primary: "john@example.com" });
         });
 
         it("should return an empty object when there is no differences", () => {
@@ -107,6 +107,26 @@ describe("smart-differences", () => {
         });
 
         describe("with options", () => {
+            describe("using deepCompare", () => {
+                it("should return all field from left when right is null", () => {
+                    const diffs = getDifferences(johnProfile, null, { deepCompare: true });
+                    expectDiffCount(diffs, 4);
+                    expectDiffOnProperty(diffs, "age", 19, undefined);
+                    expectDiffOnProperty(diffs, "name", "john", undefined);
+                    expectDiffOnProperty(diffs, "nip", null, undefined);
+                    expectDiffOnProperty(diffs, "emails.primary", "john@example.com", undefined);
+                });
+
+                it("should return all field from right when left is null", () => {
+                    const diffs = getDifferences(null, johnProfile, { deepCompare: true });
+                    expectDiffCount(diffs, 4);
+                    expectDiffOnProperty(diffs, "age", undefined, 19);
+                    expectDiffOnProperty(diffs, "name", undefined, "john");
+                    expectDiffOnProperty(diffs, "nip", undefined, null);
+                    expectDiffOnProperty(diffs, "emails.primary", undefined, "john@example.com");
+                });
+            });
+
             describe("using path filtering", () => {
                 describe("using whitelisting", () => {
                     it("should only include the path where the pathFilter function returns true", () => {
@@ -246,11 +266,6 @@ describe("smart-differences", () => {
                         },
                         phones: {
                             primary: "1877ASKHELP"
-                        },
-                        favoriteFruit: {
-                            summer: {
-                                banana: true
-                            }
                         }
                     };
                     const object2 = {
@@ -282,6 +297,7 @@ describe("smart-differences", () => {
                     const removeSequenceTransformation = (seq: string) => (value: unknown) =>
                         value && typeof value === "string" ? value.replace(new RegExp(seq, "g"), "") : value;
                     const diffs = getDifferences(object1, object2, {
+                        deepCompare: true,
                         pathFilter: whitelistProperties([
                             "firstName",
                             "lastName",

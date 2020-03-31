@@ -33,6 +33,11 @@ export type CompareOptions = {
     //A function to specify which path of comparaison should be included in the compare
     //Function should return true with the path should be included
     pathFilter?: PathFilter;
+    //This applies when comparing a property which is null or undefined and an object on the other side.
+    //When using deepCompare (default false), it will compare each nested property of the object and
+    //report a difference compared to the value undefined. With deepCompare = false, it will only report
+    //a single difference. See examples.
+    deepCompare?: boolean;
     //Provide a list of transformation to be applied when comparing any values.
     compareTransformations?: TransformValueFunction[];
     //This is a specialized version of the compareTransformations option. The factory can provide a list of
@@ -161,7 +166,7 @@ export function getDifferences(left: unknown, right: unknown, options: CompareOp
 
     const differences = diff(left, right);
     if (differences) {
-        const extendedDifferences = getExplodedDifferences(differences);
+        const extendedDifferences = options.deepCompare ? getExplodedDifferences(differences) : differences;
         const meaningfulDifferences = getMeaningfulDifferences(extendedDifferences, options);
         return meaningfulDifferences.reduce((acc: Differences, diff: any): Differences => {
             const pathString = diff.path.join(".");

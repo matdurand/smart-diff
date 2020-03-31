@@ -84,7 +84,67 @@ would return
 }
 ```
 
-#### Transformtions
+Beware when using pathFiltering and not using the deepCompare option below, you will
+receive the head property of a nested object, not not the properties below. For example
+(based on the deepCompare example below), your filter would receive:
+```
+[name, favoriteSong]
+```
+
+When using deepCompare, it would receive:
+```
+[name, favoriteSong.name, favoriteSong.artist.name, favoriteSong.year]
+```
+
+#### deepCompare
+
+Deep compare is an option used when one side of the comparaison is null or undefined, and the other side is an
+object.
+
+Here is two output of the same compare with and without deepCompare.
+
+```
+const object1 = {
+  name: "John",
+  favoriteSong: {
+      name: "Winter Wonderland",
+      artist: {
+          name: "Felix Bernard"
+      },
+      year: 1934
+  }
+};
+const object2 = {
+  name: "Fred"
+};
+```
+
+```
+//with deepCompare, the differences would be
+{ 
+  name: { left: 'John', right: 'Fred' },
+  'favoriteSong.name': { left: 'Winter Wonderland', right: undefined },
+  'favoriteSong.artist.name': { left: 'Felix Bernard', right: undefined },
+  'favoriteSong.year': { left: 1934, right: undefined } 
+}
+
+//without deepCompare
+{ 
+  name: { left: 'John', right: 'Fred' },
+  favoriteSong: { 
+    left: { 
+      name: 'Winter Wonderland', 
+      artist: {
+          name: "Felix Bernard"
+      }, 
+      year: 1934 
+    },
+    right: undefined 
+  } 
+}
+```
+
+#### Transformations
 
 You can also apply transformations to the values before compare, for example to ignore case or extra spaces.
 
