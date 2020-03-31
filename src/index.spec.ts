@@ -46,7 +46,7 @@ describe("smart-differences", () => {
             expectDiffOnProperty(diffs, "age", 19, undefined);
             expectDiffOnProperty(diffs, "name", "john", undefined);
             expectDiffOnProperty(diffs, "nip", null, undefined);
-            expectDiffOnProperty(diffs, "emails", { primary: "john@example.com" }, undefined);
+            expectDiffOnProperty(diffs, "emails.primary", "john@example.com", undefined);
         });
 
         it("should return all field from right when left is null", () => {
@@ -55,7 +55,7 @@ describe("smart-differences", () => {
             expectDiffOnProperty(diffs, "age", undefined, 19);
             expectDiffOnProperty(diffs, "name", undefined, "john");
             expectDiffOnProperty(diffs, "nip", undefined, null);
-            expectDiffOnProperty(diffs, "emails", undefined, { primary: "john@example.com" });
+            expectDiffOnProperty(diffs, "emails.primary", undefined, "john@example.com");
         });
 
         it("should return an empty object when there is no differences", () => {
@@ -264,6 +264,13 @@ describe("smart-differences", () => {
                             street: "Pacific Coast Highway",
                             city: "Los Angeles",
                             postalCode: "W2K7R9"
+                        },
+                        favoriteSong: {
+                            name: "Winter Wonderland",
+                            artist: {
+                                name: "Felix Bernard"
+                            },
+                            year: 1934
                         }
                     };
                     const removeSequenceTransformation = (seq: string) => (value: unknown) =>
@@ -292,10 +299,13 @@ describe("smart-differences", () => {
                             return null;
                         }
                     });
-                    expectDiffCount(diffs, 3);
+                    expectDiffCount(diffs, 6);
                     expectDiffOnProperty(diffs, "nip", undefined, null);
                     expectDiffOnProperty(diffs, "address.street", null, "Pacific Coast Highway");
                     expectDiffOnProperty(diffs, "emails.primary", undefined, "smart.ass@diehard.com");
+                    expectDiffOnProperty(diffs, "favoriteSong.name", undefined, "Winter Wonderland");
+                    expectDiffOnProperty(diffs, "favoriteSong.artist.name", undefined, "Felix Bernard");
+                    expectDiffOnProperty(diffs, "favoriteSong.year", undefined, 1934);
                 });
             });
         });

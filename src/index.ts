@@ -45,6 +45,22 @@ function isDate(obj: unknown): boolean {
     return Object.prototype.toString.call(obj) === "[object Date]";
 }
 
+const isPlainObject = function(obj: unknown): boolean {
+    return Object.prototype.toString.call(obj) === "[object Object]";
+};
+
+const flattenObject = (obj: any, prefix: string, res: any = {}) => {
+    return Object.entries(obj).reduce((r, [key, val]) => {
+        const k = `${prefix}${key}`;
+        if (val && isPlainObject(val)) {
+            flattenObject(val, `${k}.`, r);
+        } else {
+            res[k] = val;
+        }
+        return r;
+    }, res);
+};
+
 function applyTransformations(transformations: TransformValueFunction[], value: unknown) {
     let finalValue = value;
     transformations.forEach(t => {
@@ -107,10 +123,34 @@ export function getDifferences(left: unknown, right: unknown, options: CompareOp
         const meaningfulDifferences = getMeaningfulDifferences(differences, options);
         return meaningfulDifferences.reduce((acc: Differences, diff: any): Differences => {
             const pathString = diff.path.join(".");
-            acc[pathString] = {
-                left: diff.lhs !== undefined ? diff.lhs : undefined,
-                right: diff.rhs !== undefined ? diff.rhs : undefined
-            };
+            const lhsDefined = !(diff.lhs === null || diff.lhs === undefined);
+            const rhsDefined = !(diff.rhs === null || diff.rhs === undefined);
+            //When a property is missing on one side, and an object on the other side, deep-diff
+            //will not go deep inside the object and will report this as one difference. In that
+            //case (null or undefined on one side, and on object on the other), we flatten the object
+            //and report every nested field as a difference, with undefined as the compare value
+            if (lhsDefined && isPlainObject(diff.lhs) && !rhsDefined) {
+                const nestedDiffs = flattenObject(diff.lhs, `${pathString}.`);
+                Object.entries(nestedDiffs).forEach(([key, value]) => {
+                    acc[key] = {
+                        left: value,
+                        right: undefined
+                    };
+                });
+            } else if (rhsDefined && isPlainObject(diff.rhs) && !lhsDefined) {
+                const nestedDiffs = flattenObject(diff.rhs, `${pathString}.`);
+                Object.entries(nestedDiffs).forEach(([key, value]) => {
+                    acc[key] = {
+                        left: undefined,
+                        right: value
+                    };
+                });
+            } else {
+                acc[pathString] = {
+                    left: diff.lhs !== undefined ? diff.lhs : undefined,
+                    right: diff.rhs !== undefined ? diff.rhs : undefined
+                };
+            }
             return acc;
         }, {});
     }
