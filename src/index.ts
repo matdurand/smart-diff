@@ -1,4 +1,4 @@
-import { diff, Diff, DiffEdit } from "deep-diff";
+import { diff, Diff, DiffEdit, DiffNew, DiffDeleted } from "deep-diff";
 
 export interface Differences {
     [field: string]: {
@@ -114,43 +114,57 @@ function getMeaningfulDifferences(differences: Diff<unknown, unknown>[], options
     });
 }
 
+function getExplodedDifferences(differences: Diff<unknown, unknown>[]): Diff<unknown, unknown>[] {
+    //When a property is missing on one side (null or undefined), and there is an object on the other side,
+    //deep-diff will not go deep inside the object and will report this as one difference. In that case
+    //(null or undefined on one side, and on object on the other), we flatten the object and report every
+    //nested field as a difference, with undefined as the compare value
+    const diffNewObjectFilter = (diff: any) => diff.kind === "N" && isPlainObject(diff.rhs);
+    const diffDeletedObjectFilter = (diff: any) => diff.kind === "D" && isPlainObject(diff.lhs);
+
+    const diffNewAdditions = differences.filter(diffNewObjectFilter).flatMap((diff: any) => {
+        const pathString = diff.path.join(".");
+        return Object.entries(flattenObject(diff.rhs, `${pathString}.`)).map(([key, value]) => {
+            return {
+                kind: "N",
+                path: key.split("."),
+                rhs: value
+            } as DiffNew<unknown>;
+        });
+    });
+
+    const diffDeletedAdditions = differences.filter(diffDeletedObjectFilter).flatMap((diff: any) => {
+        const pathString = diff.path.join(".");
+        return Object.entries(flattenObject(diff.lhs, `${pathString}.`)).map(([key, value]) => {
+            return {
+                kind: "D",
+                path: key.split("."),
+                lhs: value
+            } as DiffDeleted<unknown>;
+        });
+    });
+
+    return [
+        ...differences.filter(d => !diffNewObjectFilter(d) && !diffDeletedObjectFilter(d)),
+        ...diffNewAdditions,
+        ...diffDeletedAdditions
+    ];
+}
+
 export function getDifferences(left: unknown, right: unknown, options: CompareOptions = {}): Differences {
     left = left || {};
     right = right || {};
 
     const differences = diff(left, right);
     if (differences) {
-        const meaningfulDifferences = getMeaningfulDifferences(differences, options);
+        const extendedDifferences = getExplodedDifferences(differences);
+        const meaningfulDifferences = getMeaningfulDifferences(extendedDifferences, options);
         return meaningfulDifferences.reduce((acc: Differences, diff: any): Differences => {
             const pathString = diff.path.join(".");
-            const lhsDefined = !(diff.lhs === null || diff.lhs === undefined);
-            const rhsDefined = !(diff.rhs === null || diff.rhs === undefined);
-            //When a property is missing on one side, and an object on the other side, deep-diff
-            //will not go deep inside the object and will report this as one difference. In that
-            //case (null or undefined on one side, and on object on the other), we flatten the object
-            //and report every nested field as a difference, with undefined as the compare value
-            if (lhsDefined && isPlainObject(diff.lhs) && !rhsDefined) {
-                const nestedDiffs = flattenObject(diff.lhs, `${pathString}.`);
-                Object.entries(nestedDiffs).forEach(([key, value]) => {
-                    acc[key] = {
-                        left: value,
-                        right: undefined
-                    };
-                });
-            } else if (rhsDefined && isPlainObject(diff.rhs) && !lhsDefined) {
-                const nestedDiffs = flattenObject(diff.rhs, `${pathString}.`);
-                Object.entries(nestedDiffs).forEach(([key, value]) => {
-                    acc[key] = {
-                        left: undefined,
-                        right: value
-                    };
-                });
-            } else {
-                acc[pathString] = {
-                    left: diff.lhs !== undefined ? diff.lhs : undefined,
-                    right: diff.rhs !== undefined ? diff.rhs : undefined
-                };
-            }
+            acc[pathString] = {
+                left: diff.lhs !== undefined ? diff.lhs : undefined,
+                right: diff.rhs !== undefined ? diff.rhs : undefined
+            };
             return acc;
         }, {});
     }

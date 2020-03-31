@@ -20,7 +20,8 @@ const expectDiffOnProperty = (diff: Differences, property: string, left: unknown
 
 const whitelistProperties = (properties: string[]): PathFilter => {
     return (paths: string[]) => {
-        return paths.filter(x => properties.includes(x)).length > 0;
+        const property = paths.join(".");
+        return properties.includes(property);
     };
 };
 
@@ -245,6 +246,11 @@ describe("smart-differences", () => {
                         },
                         phones: {
                             primary: "1877ASKHELP"
+                        },
+                        favoriteFruit: {
+                            summer: {
+                                banana: true
+                            }
                         }
                     };
                     const object2 = {
@@ -276,6 +282,22 @@ describe("smart-differences", () => {
                     const removeSequenceTransformation = (seq: string) => (value: unknown) =>
                         value && typeof value === "string" ? value.replace(new RegExp(seq, "g"), "") : value;
                     const diffs = getDifferences(object1, object2, {
+                        pathFilter: whitelistProperties([
+                            "firstName",
+                            "lastName",
+                            "killCount",
+                            "nip",
+                            "phones.primary",
+                            "emails.primary",
+                            "emails.secondary",
+                            "address.civicNumber",
+                            "address.street",
+                            "address.city",
+                            "address.postalCode",
+                            "favoriteSong.name",
+                            "favoriteSong.year",
+                            "favoriteSong.artist.name"
+                        ]),
                         compareTransformations: [StringTransformations.uppercase, StringTransformations.trim],
                         pathCompareTransformationsProvider: (pathElements: string[]) => {
                             const property = pathElements.join(".");
