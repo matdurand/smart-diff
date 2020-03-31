@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/matdurand/smart-diff/compare/v1.4.2...v1.5.0) (2020-03-31)
+
+
+### Features
+
+* added the deepCompare option to control nested flattening ([3e69e79](https://github.com/matdurand/smart-diff/commit/3e69e79f78b61d2e6d088ef6660cc22c52cda661))
+
 ### [1.4.2](https://github.com/matdurand/smart-diff/compare/v1.4.1...v1.4.2) (2020-03-31)
 
 
