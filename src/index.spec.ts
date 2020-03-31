@@ -192,11 +192,37 @@ describe("smart-differences", () => {
             });
 
             describe("using nullOfUndefinedAsEmptyString transformation option", () => {
-                it("should ignore difference when the string values are equal", () => {
+                it("should ignore difference between empty string and null", () => {
                     const diffs = getDifferences(
                         { ...johnProfile, name: "" },
                         { ...johnProfile, name: null },
                         {
+                            compareTransformations: [StringTransformations.nullOfUndefinedAsEmptyString]
+                        }
+                    );
+                    expectDiffCount(diffs, 0);
+                });
+
+                it("should ignore difference between null and undefined", () => {
+                    const diffs = getDifferences(
+                        { ...johnProfile, name: undefined },
+                        { ...johnProfile, name: null },
+                        {
+                            compareTransformations: [StringTransformations.nullOfUndefinedAsEmptyString]
+                        }
+                    );
+                    expectDiffCount(diffs, 0);
+                });
+
+                it("should ignore difference between null and undefined in nested objects", () => {
+                    const diffs = getDifferences(
+                        {
+                            ...johnProfile,
+                            phones: { home: null, office: undefined, cell: "111" }
+                        },
+                        { ...johnProfile, phones: { cell: "111", office: null, officeExtension: null } },
+                        {
+                            deepCompare: true,
                             compareTransformations: [StringTransformations.nullOfUndefinedAsEmptyString]
                         }
                     );

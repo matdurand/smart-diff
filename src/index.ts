@@ -103,22 +103,30 @@ function getMeaningfulDifferences(differences: Diff<unknown, unknown>[], options
             throw new Error("Unexpected error in pathFiltering");
         });
     }
-    return meaningfulDifferences.filter((diff: Diff<unknown, unknown>): boolean => {
-        if (diff.kind === "E") {
-            const diffEdit = diff as DiffEdit<unknown, unknown>;
-            /* istanbul ignore next */
-            const pathElements = diffEdit.path ? diffEdit.path : null;
-            const pathTransformations =
-                pathElements && options.pathCompareTransformationsProvider
-                    ? options.pathCompareTransformationsProvider(pathElements)
-                    : undefined;
-            if (pathTransformations) {
-                return !createCompareFunction(pathTransformations)(diffEdit.lhs, diffEdit.rhs);
-            }
-
-            const globalCompareFunction = createCompareFunction(options.compareTransformations);
-            return !globalCompareFunction(diffEdit.lhs, diffEdit.rhs);
+    const compareFunction = (left: unknown, right: unknown, path?: any[]) => {
+        /* istanbul ignore next */
+        const pathElements = path ? path : null;
+        const pathTransformations =
+            pathElements && options.pathCompareTransformationsProvider
+                ? options.pathCompareTransformationsProvider(pathElements)
+                : undefined;
+        if (pathTransformations) {
+            return !createCompareFunction(pathTransformations)(left, right);
         }
+
+        const globalCompareFunction = createCompareFunction(options.compareTransformations);
+        return !globalCompareFunction(left, right);
+    };
+    return meaningfulDifferences.filter((diff: Diff<unknown, unknown>): boolean => {
+        switch (diff.kind) {
+            case "E":
+                return compareFunction((diff as any).lhs, (diff as any).rhs, (diff as any).path);
+            case "D":
+                return compareFunction((diff as any).lhs, undefined, (diff as any).path);
+            case "N":
+                return compareFunction(undefined, (diff as any).rhs, (diff as any).path);
+        }
+        /* istanbul ignore next */
         return true;
     });
 }
