@@ -1,6 +1,6 @@
 {
   "name": "smart-differences",
-  "version": "1.2.0",
+  "version": "1.5.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,6 +44,7 @@
     "jest-expect-message": "^1.0.2",
     "lint-staged": "10.0.9",
     "lodash": "4.17.15",
+    "moment": "2.24.0",
     "prettier": "1.19.1",
     "rollup-plugin-typescript2": "0.27.0",
     "standard-version": "^7.1.0",
@@ -58,12 +59,13 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "pre-push": "lint-staged && npm run test:cov"
     }
   },
   "lint-staged": {
-    "*.{ts,js,json}": [
-      "prettier --write",
+    "*.{ts}": [
+      "npm run lint -- --fix",
       "git add"
     ]
   },
